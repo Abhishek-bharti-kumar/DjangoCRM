@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
+from .forms import SingUpForm
 
 def home(request):
     #to check the data is POST or GET and store the data to the field
@@ -26,4 +27,16 @@ def logout_user(request):
     return redirect('home')
 
 def register_user(request):
-    return render(request,'register_user.html',{})
+    if request.method =='POST':
+        form = SingUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data['username']
+            password = form.changed_data['password1']
+            user = authenticate(username=username,password=password,)
+            login(request, user)
+            messages.success(request,'yoouhave succesfully registered')
+            return redirect('home')
+    else:
+        form = SingUpForm()    
+    return render(request,'register_user.html',{'form':form})
